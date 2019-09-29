@@ -1,16 +1,26 @@
 import socket
 import sys
 import random
+import os
 from ctypes import *
 
+class Error(Structure):
+    _pack_ = 1
+    _fields_ = [("message",c_char_p),("code",c_uint32)]
 
-class Payload(Structure):
+class Customer(Structure):
+    _pack_ = 1
     _fields_ = [("id", c_uint32),
-                ("name", c_char_p)]
-
+                ("name", c_char_p),
+                 ("cpf", c_char_p),
+                ("age", c_uint32)
+                ]
+class Data(Structure):
+    _pack_ = 1
+    _fields_ =[("method",c_uint32), ("customer",Customer), ("error",Error) ]
 
 def main():
-    server_addr = ('localhost', 38106)
+    server_addr = ('localhost', 38107)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -22,23 +32,35 @@ def main():
 
     try:
         while True:
-            payload_out = Payload(int(random.uniform(1, 10)),
-                                  'hello'.encode('utf-8'))
-            print("Sending id=%d, name=%s" % (payload_out.id,
-                                              payload_out.name
-                                              ))
-            nsent = s.send(payload_out)
-            # Alternative: s.sendall(...): coontinues to send data until either
-            # all data has been sent or an error occurs. No return value.
-            print("Sent %d bytes" % nsent)
+            option = raw_input('Create or read customer?(C/r)')
+            if option in ['C']:
+                name = raw_input('Name: ')
+                cpf = raw_input('Cpf: ')
+                age = int(raw_input('Age: '))
+                customer_input = Customer(id=int(random.uniform(1,100)),name = name, cpf = str(cpf), age = age) 
 
-            buff = s.recv(sizeof(Payload))
-            payload_in = Payload.from_buffer_copy(buff)
-            print("Received id=%d, name=%s" % (payload_in.id,
-                                               payload_in.name))
-            option = input('Do you wish to continue?')
-            if option not in ['1']:
+                print("Sending id=%d, name=%s, cpf=%s, age=%d"  % (customer_input.id,
+                                                customer_input.name,
+                                                customer_input.cpf,
+                                                customer_input.age
+                                                ))
+                data = Data(customer = customer_input, method=1, error=Error(message=None, code=0))
+
+                nsent = s.send(data)
+                print("Sent %d bytes" % nsent)
+
+                buff = s.recv(sizeof(Data))
+                data_output = Data.from_buffer_copy(buff)
+                print(data_output.method, data_output.customer.name)   
+            else:
+                pass
+            
+            option = raw_input('Do you wish to continue?(y/N)')
+            if option not in ['y']:
                 break
+            else:
+                os.system('clear')
+
     finally:
         print("Closing socket")
         s.close()

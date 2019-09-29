@@ -11,16 +11,32 @@
 #include <fcntl.h>
 #pragma pack(1)
 
+#define POST 1
 
 
 typedef struct CUSTOMER_t {
     uint32_t id;
+    uint32_t age;
     char* nome;
+    char* cpf;
 } CUSTOMER;
 
-typedef struct dataBase_t {
-    CUSTOMER* customers[100];
+typedef struct DATABASE_t {
+    CUSTOMER customers[100];
 } DATABASE;
+
+typedef struct ERROR_t {
+    char* message;
+    uint32_t code;
+} ERROR;
+
+typedef struct DATA_t {
+    uint32_t method;
+    CUSTOMER customer;
+    ERROR error;
+} DATA;
+
+
 
 
 #pragma pack()
@@ -72,21 +88,28 @@ void sendMsg(int sock, void* msg, uint32_t msgsize)
     return;
 }
 
-void initDatabase(DATABASE database)
+void initDatabase(DATABASE* database)
 {
     for(int i=1; i<100; i++)
     {
-        database.customers[i] = NULL;
+        database->customers[i].id = -1;
     }
 }
 
-
+CUSTOMER* findCustomerByCpf(char* cpf, DATABASE* database )
+{
+     for(int i=1; i<100; i++)
+    {
+        if(strcmp(database->customers[i].cpf, cpf) == 0) return &database->customers[i];
+    }
+    return NULL;
+}
 
 int main()
 {
-    int PORT = 38106;
+    int PORT = 38107;
     int BUFFSIZE = 512;
-    char buff[BUFFSIZE];
+    DATA buff;
     int ssock, csock;
     int nread;
     int fd;
@@ -94,9 +117,11 @@ int main()
     int clilen = sizeof(client);
     pid_t pid;
     DATABASE database;
+    CUSTOMER *customer;
     char *myfifo = "/tmp/hello";
     char *message; 
     int mkFIFO;
+
     remove(myfifo); 
     mkFIFO = mkfifo(myfifo, 0666);
     if (mkFIFO < 0){
@@ -107,7 +132,7 @@ int main()
     printf("Server listening on port %d\n", PORT);
     fd = open(myfifo, O_RDWR | O_TRUNC);
     write(fd,  database.customers, sizeof(DATABASE));
-    initDatabase(database);
+    initDatabase(&database);
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
         if (csock < 0)
@@ -123,21 +148,28 @@ int main()
         if (pid <= 0)
         {
             printf("Accepted connection from %s\n", inet_ntoa(client.sin_addr));
-            bzero(buff, BUFFSIZE);
-            while ((nread=read(csock, buff, BUFFSIZE)) > 0)
+            while ((nread=read(csock, &buff, BUFFSIZE)) > 0)
             {
                 printf("\nReceived %d bytes\n", nread);
-                CUSTOMER *p = (CUSTOMER*) buff;
-                printf("Received contents: id=%d, counter=%s",
-                        p->id, p->nome);
-                
                 read(fd, database.customers, sizeof(DATABASE));
-                database.customers[p->id] = p;
-                printf("\nInserted!");
-                printf("\nSending message back to client.. ");
-                message="Registered!";
-                sendMsg(csock, message, sizeof(message));
-                write(fd,  database.customers, sizeof(DATABASE));
+                if (buff.method == POST)
+                {
+                    database.customers[buff.customer.id] = buff.customer;
+                    printf("\nInserted!");
+                    printf("\nSending message back to client.. ");
+                    sendMsg(csock, &buff, sizeof(DATA));
+                    write(fd,  database.customers, sizeof(DATABASE));
+                }else
+                {
+                    customer = findCustomerByCpf(buff.customer.cpf, &database);   
+                    if (customer == NULL){
+                        printf("\nCustomer not found!");
+                        printf("\nSending message back to client.. ");
+                        buff.error.message = "Customer not found!";
+                        buff.error.code = 404;
+                    }
+                }
+               
             
             }
             printf("Closing connection to client\n");
