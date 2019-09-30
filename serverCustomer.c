@@ -1,90 +1,7 @@
-#include <sys/socket.h>
-#include <arpa/inet.h> //inet_addr
-#include <unistd.h>    //write
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#pragma pack(1)
-
-#define POST 1
-
-typedef struct CUSTOMER_t
-{
-    int id;
-    int age;
-    char nome[100];
-} CUSTOMER;
-
-typedef struct DATABASE_t
-{
-    CUSTOMER customers[100];
-} DATABASE;
-
-typedef struct STATUS_t
-{
-    int code;
-    char message[100];
-} STATUS;
-
-typedef struct DATA_t
-{
-    int method;
-    CUSTOMER customer;
-    STATUS status;
-} DATA;
+#include "includes/socket.h"
+#include "includes/serverCustomer.h"
 
 #pragma pack()
-
-int createSocket(int port)
-{
-    int sock, err;
-    struct sockaddr_in server;
-
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        printf("ERROR: Socket creation failed\n");
-        exit(1);
-    }
-    printf("Socket created\n");
-
-    bzero((char *)&server, sizeof(server));
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(port);
-    if (bind(sock, (struct sockaddr *)&server, sizeof(server)) < 0)
-    {
-        printf("ERROR: Bind failed\n");
-        exit(1);
-    }
-    printf("Bind done\n");
-
-    listen(sock, 3);
-
-    return sock;
-}
-
-void closeSocket(int sock)
-{
-    close(sock);
-    return;
-}
-
-void sendMsg(int sock, void *msg, uint32_t msgsize)
-{
-    if (write(sock, msg, msgsize) < 0)
-    {
-        printf("Can't send message.\n");
-        closeSocket(sock);
-        exit(1);
-    }
-    printf("Message sent (%d bytes).\n", msgsize);
-    return;
-}
 
 void initDatabase(DATABASE *database)
 {
@@ -115,8 +32,6 @@ int main()
     struct sockaddr_in client;
     int clilen = sizeof(client);
     pid_t pid;
-    DATABASE database;
-    CUSTOMER customer;
     char *myfifo = "/tmp/hello";
     char *message;
     int mkFIFO;
@@ -169,7 +84,7 @@ int main()
                         buff.status.code = 200;
                     }
                 }
-                else
+                else if (buff.method == GET)
                 {
                     customer = findCustomerByID(buff.customer.id, &database);
                     strcpy(buff.status.message, "Customer's data");
