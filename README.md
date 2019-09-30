@@ -1,6 +1,6 @@
 # Client/server
 
-This is a simple project on using sockets for interprocess communication. There are three linux C servers available and you can connect to these servers through N clients.
+This is a simple project on using sockets for interprocess communication. There are three C linux servers available for usage and you can connect to these servers through N clients.
 
 ```
 Customer server
