@@ -36,7 +36,7 @@ def main():
             if option.lower() in ['c','']:
                 id = int(raw_input("ID (0-99):"))
                 if id not in range(0,100):
-                    print('Interval 1 through 100!')
+                    print('Interval 0 through 99!')
                     break
                 name = raw_input('Name:')
                 age = int(raw_input('Age:'))
