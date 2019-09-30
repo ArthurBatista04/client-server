@@ -23,7 +23,7 @@ Python 2.7
 GCC
 ```
 
-## Usage
+### Usage
 
 To run the servers you must first compile all of them using make.
 
