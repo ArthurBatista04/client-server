@@ -8,7 +8,7 @@ Food server
 Drink server
 ```
 
-Each server uses a different technique to handle passing information from one process to another and contains a unique database for create and read operations. The customer server uses FIFO, the next one PIPE and finally Shared Memory with POSIX semaphore.
+Each server uses a different technique to handle passing information from one process to another and contains a unique database for create and read operations. The customer server uses FIFO, the next one PIPE and lastly shared memory with POSIX semaphore.
 
 ## Getting Started
 
