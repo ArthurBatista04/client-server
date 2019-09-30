@@ -26,8 +26,12 @@ def main():
                 option = raw_input('Add or fetch customer?(A/f)')
                 customer_menu(option, s)
             elif option is "2":
-                option = raw_input('Add food or fetch menu?(A/f)')
+                option = raw_input('Add or fetch food?(A/f)')
                 food_menu(option, s)
+            elif option is "3":
+                option = raw_input('Add or fetch drink?(A/f)')
+            else:
+                print("Invalid input. Try again!")
             option = raw_input('Do you wish to continue?(y/N)')
             if option not in ['y']:
                 break
