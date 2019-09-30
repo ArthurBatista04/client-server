@@ -26,6 +26,7 @@ typedef struct DATABASE_t {
 
 typedef struct STATUS_t {
     int code;
+    char message[100];
 } STATUS;
 
 typedef struct DATA_t {
@@ -158,28 +159,27 @@ int main()
                 {
                     if(database.customers[buff.customer.id].id != -1)
                     {
-                        printf("\nThis id has aldready been registered!");
+                        strcpy(buff.status.message,"This id has aldready been registered!");
                         buff.status.code = 500;
                         buff.customer.id = -1;
                     } else
                     {
                         database.customers[buff.customer.id] = buff.customer;
-                        printf("\nInserted!");
+                        strcpy(buff.status.message,"Registered data");
                         buff.status.code = 200;
-                    }
-                    printf("\nSending response back to client.. ");
-                   
-                    
+                    }   
                 }else
                 {
                     customer = findCustomerByID(buff.customer.id, &database);
+                    strcpy(buff.status.message,"Customer's data");
+                    buff.status.code = 200;
                     if (customer.id == -1){
-                        printf("\nCustomer not found!");
-                        printf("\nSending message back to client.. ");
+                        strcpy(buff.status.message,"Customer not found!");
                         buff.status.code = 404;
                     }
                     buff.customer = customer;
                 }
+                printf("\nSending message back to client.. ");
                 sendMsg(csock, &buff, sizeof(DATA));
                 write(fd,  &database, sizeof(DATABASE));
                
