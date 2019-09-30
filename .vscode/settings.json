@@ -1,5 +1,5 @@
 {
     "python.pythonPath": "/bin/python2",
     "python.linting.enabled": false,
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "autopep8"
 }

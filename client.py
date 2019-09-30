@@ -4,9 +4,11 @@ import random
 import os
 from ctypes import *
 
+
 class STATUS(Structure):
     _pack_ = 1
-    _fields_ = [("code",c_int),("message", c_char*100)]
+    _fields_ = [("code", c_int), ("message", c_char*100)]
+
 
 class Customer(Structure):
     _pack_ = 1
@@ -14,9 +16,12 @@ class Customer(Structure):
                 ("name", c_char*100),
                 ("age", c_int)
                 ]
+
+
 class Data(Structure):
     _pack_ = 1
-    _fields_ =[("method",c_int), ("customer",Customer),  ("status",STATUS) ]
+    _fields_ = [("method", c_int), ("customer", Customer),  ("status", STATUS)]
+
 
 def main():
     server_addr = ('localhost', 38110)
@@ -33,22 +38,24 @@ def main():
         while True:
             option = raw_input('Create or read customer?(C/r)')
             invalidInput = False
-            if option.lower() in ['c','']:
+            if option.lower() in ['c', '']:
                 id = int(raw_input("ID (0-99):"))
-                if id not in range(0,100):
+                if id not in range(0, 100):
                     print('Interval 0 through 99!')
                     break
                 name = raw_input('Name:')
                 age = int(raw_input('Age:'))
-                customer_input = Customer(id=id,name=name, age=age) 
+                customer_input = Customer(id=id, name=name, age=age)
 
                 print("Sending data to server...")
-                data = Data(customer = customer_input, method=1,  status=STATUS(code=0,message= 'None'))
+                data = Data(customer=customer_input, method=1,
+                            status=STATUS(code=0, message='None'))
 
             elif option.lower() in ['r']:
                 id = int(raw_input("Input the customer's ID: "))
-                customer_input = Customer(id=id,name = 'None', age = 0) 
-                data = Data(customer = customer_input, method=2,  status=STATUS(code=0,message= 'None'))
+                customer_input = Customer(id=id, name='None', age=0)
+                data = Data(customer=customer_input, method=2,
+                            status=STATUS(code=0, message='None'))
             else:
                 print("Wrong input. Try again!")
                 invalidInput = True
@@ -61,11 +68,11 @@ def main():
                 print('Status code: %d ' % data_output.status.code)
                 print(data_output.status.message)
                 if data_output.customer.id != -1:
-                     print("ID = %d, Name = %s and Age = %d"  % (data_output.customer.id,
-                                                data_output.customer.name,
-                                                data_output.customer.age
-                                                ))
-            
+                    print("ID = %d, Name = %s and Age = %d" % (data_output.customer.id,
+                                                               data_output.customer.name,
+                                                               data_output.customer.age
+                                                               ))
+
             option = raw_input('Do you wish to continue?(y/N)')
             if option not in ['y']:
                 break

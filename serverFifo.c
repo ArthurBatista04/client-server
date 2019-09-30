@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <pthread.h> 
+#include <pthread.h>
 #include <semaphore.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -13,33 +13,32 @@
 
 #define POST 1
 
-
-typedef struct CUSTOMER_t {
+typedef struct CUSTOMER_t
+{
     int id;
     int age;
     char nome[100];
 } CUSTOMER;
 
-typedef struct DATABASE_t {
+typedef struct DATABASE_t
+{
     CUSTOMER customers[100];
 } DATABASE;
 
-typedef struct STATUS_t {
+typedef struct STATUS_t
+{
     int code;
     char message[100];
 } STATUS;
 
-typedef struct DATA_t {
+typedef struct DATA_t
+{
     int method;
     CUSTOMER customer;
     STATUS status;
 } DATA;
 
-
-
-
 #pragma pack()
-
 
 int createSocket(int port)
 {
@@ -53,18 +52,18 @@ int createSocket(int port)
     }
     printf("Socket created\n");
 
-    bzero((char *) &server, sizeof(server));
+    bzero((char *)&server, sizeof(server));
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(port);
-    if (bind(sock, (struct sockaddr *)&server , sizeof(server)) < 0)
+    if (bind(sock, (struct sockaddr *)&server, sizeof(server)) < 0)
     {
         printf("ERROR: Bind failed\n");
         exit(1);
     }
     printf("Bind done\n");
 
-    listen(sock , 3);
+    listen(sock, 3);
 
     return sock;
 }
@@ -75,7 +74,7 @@ void closeSocket(int sock)
     return;
 }
 
-void sendMsg(int sock, void* msg, uint32_t msgsize)
+void sendMsg(int sock, void *msg, uint32_t msgsize)
 {
     if (write(sock, msg, msgsize) < 0)
     {
@@ -87,15 +86,15 @@ void sendMsg(int sock, void* msg, uint32_t msgsize)
     return;
 }
 
-void initDatabase(DATABASE* database)
+void initDatabase(DATABASE *database)
 {
-    for(int i=0; i<100; i++)
+    for (int i = 0; i < 100; i++)
     {
-         database->customers[i].id = -1;
+        database->customers[i].id = -1;
     }
 }
 
-CUSTOMER findCustomerByID(uint32_t id, DATABASE *database )
+CUSTOMER findCustomerByID(uint32_t id, DATABASE *database)
 {
     CUSTOMER fake;
     fake.id = -1;
@@ -105,7 +104,6 @@ CUSTOMER findCustomerByID(uint32_t id, DATABASE *database )
         return database->customers[id];
     }
     return fake;
-    
 }
 
 int main()
@@ -120,21 +118,22 @@ int main()
     DATABASE database;
     CUSTOMER customer;
     char *myfifo = "/tmp/hello";
-    char *message; 
+    char *message;
     int mkFIFO;
 
-    remove(myfifo); 
+    remove(myfifo);
     mkFIFO = mkfifo(myfifo, 0666);
-    if (mkFIFO < 0){
+    if (mkFIFO < 0)
+    {
         perror("Error: mkfifo() failed = ");
         exit(1);
-    } 
+    }
     ssock = createSocket(PORT);
     printf("Server listening on port %d\n", PORT);
     fd = open(myfifo, O_RDWR | O_TRUNC);
     initDatabase(&database);
-    write(fd,  &database, sizeof(DATABASE));
-    
+    write(fd, &database, sizeof(DATABASE));
+
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
         if (csock < 0)
@@ -142,8 +141,8 @@ int main()
             perror("Error: accept() failed = ");
             continue;
         }
-        if((pid = fork()) < 0) 
-        { 
+        if ((pid = fork()) < 0)
+        {
             perror("Error: fork() failed = ");
             return -1;
         }
@@ -151,45 +150,45 @@ int main()
         {
             DATA buff;
             printf("Accepted connection from %s\n", inet_ntoa(client.sin_addr));
-            while ((nread=read(csock, &buff, sizeof(DATA))) > 0)
+            while ((nread = read(csock, &buff, sizeof(DATA))) > 0)
             {
                 printf("\nReceived %d bytes\n", nread);
                 read(fd, &database, sizeof(DATABASE));
                 if (buff.method == POST)
                 {
-                    if(database.customers[buff.customer.id].id != -1)
+                    if (database.customers[buff.customer.id].id != -1)
                     {
-                        strcpy(buff.status.message,"This id has aldready been registered!");
+                        strcpy(buff.status.message, "This id has aldready been registered!");
                         buff.status.code = 500;
                         buff.customer.id = -1;
-                    } else
+                    }
+                    else
                     {
                         database.customers[buff.customer.id] = buff.customer;
-                        strcpy(buff.status.message,"Registered data");
+                        strcpy(buff.status.message, "Registered data");
                         buff.status.code = 200;
-                    }   
-                }else
+                    }
+                }
+                else
                 {
                     customer = findCustomerByID(buff.customer.id, &database);
-                    strcpy(buff.status.message,"Customer's data");
+                    strcpy(buff.status.message, "Customer's data");
                     buff.status.code = 200;
-                    if (customer.id == -1){
-                        strcpy(buff.status.message,"Customer not found!");
+                    if (customer.id == -1)
+                    {
+                        strcpy(buff.status.message, "Customer not found!");
                         buff.status.code = 404;
                     }
                     buff.customer = customer;
                 }
                 printf("\nSending message back to client.. ");
                 sendMsg(csock, &buff, sizeof(DATA));
-                write(fd,  &database, sizeof(DATABASE));
-               
-            
+                write(fd, &database, sizeof(DATABASE));
             }
             printf("Closing connection to client\n");
             printf("----------------------------\n");
             closeSocket(csock);
         }
-       
     }
 
     closeSocket(ssock);
