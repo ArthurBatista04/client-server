@@ -17,7 +17,7 @@
 typedef struct CUSTOMER_t {
     int id;
     int age;
-    char* nome;
+    char nome[100];
 } CUSTOMER;
 
 typedef struct DATABASE_t {
@@ -90,7 +90,7 @@ void initDatabase(DATABASE* database)
 {
     for(int i=0; i<100; i++)
     {
-        database->customers[i].id = -1;
+         database->customers[i].id = -1;
     }
 }
 
@@ -109,14 +109,14 @@ CUSTOMER findCustomerByID(uint32_t id, DATABASE *database )
 
 int main()
 {
-    int PORT = 38109;
+    int PORT = 38110;
     int ssock, csock;
     int nread;
     int fd;
     struct sockaddr_in client;
     int clilen = sizeof(client);
     pid_t pid;
-    DATABASE *database;
+    DATABASE database;
     CUSTOMER customer;
     char *myfifo = "/tmp/hello";
     char *message; 
@@ -131,8 +131,8 @@ int main()
     ssock = createSocket(PORT);
     printf("Server listening on port %d\n", PORT);
     fd = open(myfifo, O_RDWR | O_TRUNC);
-    initDatabase(database);
-    write(fd,  database, sizeof(DATABASE));
+    initDatabase(&database);
+    write(fd,  &database, sizeof(DATABASE));
     
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
@@ -153,17 +153,17 @@ int main()
             while ((nread=read(csock, &buff, sizeof(DATA))) > 0)
             {
                 printf("\nReceived %d bytes\n", nread);
-                read(fd, database, sizeof(DATABASE));
+                read(fd, &database, sizeof(DATABASE));
                 if (buff.method == POST)
                 {
-                    if(database->customers[buff.customer.id].id != -1)
+                    if(database.customers[buff.customer.id].id != -1)
                     {
                         printf("\nThis id has aldready been registered!");
                         buff.status.code = 500;
                         buff.customer.id = -1;
                     } else
                     {
-                        database->customers[buff.customer.id] = buff.customer;
+                        database.customers[buff.customer.id] = buff.customer;
                         printf("\nInserted!");
                         buff.status.code = 200;
                     }
@@ -172,7 +172,7 @@ int main()
                     
                 }else
                 {
-                    customer = findCustomerByID(buff.customer.id, database);
+                    customer = findCustomerByID(buff.customer.id, &database);
                     if (customer.id == -1){
                         printf("\nCustomer not found!");
                         printf("\nSending message back to client.. ");
@@ -181,7 +181,7 @@ int main()
                     buff.customer = customer;
                 }
                 sendMsg(csock, &buff, sizeof(DATA));
-                write(fd,  database, sizeof(DATABASE));
+                write(fd,  &database, sizeof(DATABASE));
                
             
             }

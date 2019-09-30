@@ -19,7 +19,7 @@ class Data(Structure):
     _fields_ =[("method",c_int), ("customer",Customer), ("status",STATUS) ]
 
 def main():
-    server_addr = ('localhost', 38109)
+    server_addr = ('localhost', 38110)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
@@ -66,6 +66,7 @@ def main():
                 print("NOT FOUND!")
             if data_output.customer.id != -1:
                 print('ID: %d' % data_output.customer.id)
+                print('Name: %s' % data_output.customer.name)
                 print('Age: %d' % data_output.customer.age)
             
             option = raw_input('Do you wish to continue?(y/N)')
