@@ -11,7 +11,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #pragma pack(1)
-
+#define POST 1
+#define GET 2
 int createSocket(int port);
 void closeSocket(int sock);
 void sendMsg(int sock, void *msg, uint32_t msgsize);

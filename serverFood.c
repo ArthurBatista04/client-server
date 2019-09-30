@@ -1,5 +1,5 @@
 #include "includes/socket.h"
-#include "includes/serverCustomer.h"
+#include "includes/serverFood.h"
 
 #pragma pack()
 
@@ -7,18 +7,18 @@ void initDatabase(DATABASE *database)
 {
     for (int i = 0; i < 100; i++)
     {
-        database->customers[i].id = -1;
+        database->foods[i].id = -1;
     }
 }
 
-CUSTOMER findCustomerByID(uint32_t id, DATABASE *database)
+FOOD searchFoodById(int id, DATABASE *database)
 {
-    CUSTOMER fake;
+    FOOD fake;
     fake.id = -1;
-    if (database->customers[id].id != -1)
+    if (database->foods[id].id != -1)
     {
 
-        return database->customers[id];
+        return database->foods[id];
     }
     return fake;
 }
@@ -28,26 +28,19 @@ int main()
     int PORT = 38110;
     int ssock, csock;
     int nread;
-    int fd;
+    int fd[2];
     struct sockaddr_in client;
     int clilen = sizeof(client);
     pid_t pid;
-    char *myfifo = "/tmp/hello";
-    int mkFIFO;
-
-    remove(myfifo);
-    mkFIFO = mkfifo(myfifo, 0666);
-    if (mkFIFO < 0)
+    if (pipe(fd) == -1)
     {
-        perror("Error: mkfifo() failed = ");
-        exit(1);
+        perror("Error: pipe() failed = ");
+        return 1;
     }
     ssock = createSocket(PORT);
     printf("Server listening on port %d\n", PORT);
-    fd = open(myfifo, O_RDWR | O_TRUNC);
     initDatabase(&database);
-    write(fd, &database, sizeof(DATABASE));
-
+    write(fd[1], &database, sizeof(DATABASE));
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
         if (csock < 0)
@@ -67,37 +60,37 @@ int main()
             while ((nread = read(csock, &buff, sizeof(DATA))) > 0)
             {
                 printf("\nReceived %d bytes\n", nread);
-                read(fd, &database, sizeof(DATABASE));
+                read(fd[0], &database, sizeof(DATABASE));
                 if (buff.method == POST)
                 {
-                    if (database.customers[buff.customer.id].id != -1)
+                    if (database.foods[buff.food.id].id != -1)
                     {
                         strcpy(buff.status.message, "This id has aldready been registered!");
                         buff.status.code = 500;
-                        buff.customer.id = -1;
+                        buff.food.id = -1;
                     }
                     else
                     {
-                        database.customers[buff.customer.id] = buff.customer;
+                        database.foods[buff.food.id] = buff.food;
                         strcpy(buff.status.message, "Registered data");
                         buff.status.code = 200;
                     }
                 }
                 else if (buff.method == GET)
                 {
-                    customer = findCustomerByID(buff.customer.id, &database);
-                    strcpy(buff.status.message, "Customer's data");
+                    food = searchFoodById(buff.food.id, &database);
+                    strcpy(buff.status.message, "Food's data");
                     buff.status.code = 200;
-                    if (customer.id == -1)
+                    if (food.id == -1)
                     {
-                        strcpy(buff.status.message, "Customer not found!");
+                        strcpy(buff.status.message, "Food not found!");
                         buff.status.code = 404;
                     }
-                    buff.customer = customer;
+                    buff.food = food;
                 }
                 printf("\nSending message back to client.. ");
                 sendMsg(csock, &buff, sizeof(DATA));
-                write(fd, &database, sizeof(DATABASE));
+                write(fd[1], &database, sizeof(DATABASE));
             }
             printf("Closing connection to client\n");
             printf("----------------------------\n");

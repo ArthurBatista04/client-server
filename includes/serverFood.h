@@ -2,16 +2,17 @@
 #define SERVERCUSTOMER_H
 #include <arpa/inet.h>
 
-typedef struct CUSTOMER_t
+typedef struct FOOD_t
 {
     int id;
-    int age;
+    float price;
+    char category[100];
     char name[100];
-} CUSTOMER;
+} FOOD;
 
 typedef struct DATABASE_t
 {
-    CUSTOMER customers[100];
+    FOOD foods[100];
 } DATABASE;
 
 typedef struct STATUS_t
@@ -23,11 +24,12 @@ typedef struct STATUS_t
 typedef struct DATA_t
 {
     int method;
-    CUSTOMER customer;
+    FOOD food;
     STATUS status;
 } DATA;
+
 void initDatabase(DATABASE *database);
-CUSTOMER findCustomerByID(uint32_t id, DATABASE *database);
+FOOD searchFoodById(int id, DATABASE *database);
 DATABASE database;
-CUSTOMER customer;
+FOOD food;
 #endif

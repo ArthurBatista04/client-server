@@ -3,6 +3,7 @@ import sys
 import random
 import os
 from customerMenu import customer_menu
+from foodMenu import food_menu
 
 
 def main():
@@ -26,6 +27,7 @@ def main():
                 customer_menu(option, s)
             elif option is "2":
                 option = raw_input('Add food or fetch menu?(A/f)')
+                food_menu(option, s)
             option = raw_input('Do you wish to continue?(y/N)')
             if option not in ['y']:
                 break

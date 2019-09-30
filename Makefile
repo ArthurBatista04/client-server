@@ -9,4 +9,4 @@ C: main
 
 main: 
 	$(CXX) serverCustomer.c socket.c -o serverCustomer.out
-	@echo "Sucesso na compilação!"
+	@echo "SUCCESS ON COMPILING CUSTOMER SERVER!"
