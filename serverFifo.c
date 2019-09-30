@@ -15,25 +15,23 @@
 
 
 typedef struct CUSTOMER_t {
-    uint32_t id;
-    uint32_t age;
+    int id;
+    int age;
     char* nome;
-    char* cpf;
 } CUSTOMER;
 
 typedef struct DATABASE_t {
     CUSTOMER customers[100];
 } DATABASE;
 
-typedef struct ERROR_t {
-    char* message;
-    uint32_t code;
-} ERROR;
+typedef struct STATUS_t {
+    int code;
+} STATUS;
 
 typedef struct DATA_t {
-    uint32_t method;
+    int method;
     CUSTOMER customer;
-    ERROR error;
+    STATUS status;
 } DATA;
 
 
@@ -90,34 +88,36 @@ void sendMsg(int sock, void* msg, uint32_t msgsize)
 
 void initDatabase(DATABASE* database)
 {
-    for(int i=1; i<100; i++)
+    for(int i=0; i<100; i++)
     {
         database->customers[i].id = -1;
     }
 }
 
-CUSTOMER* findCustomerByCpf(char* cpf, DATABASE* database )
+CUSTOMER findCustomerByID(uint32_t id, DATABASE *database )
 {
-     for(int i=1; i<100; i++)
+    CUSTOMER fake;
+    fake.id = -1;
+    if (database->customers[id].id != -1)
     {
-        if(strcmp(database->customers[i].cpf, cpf) == 0) return &database->customers[i];
+
+        return database->customers[id];
     }
-    return NULL;
+    return fake;
+    
 }
 
 int main()
 {
-    int PORT = 38107;
-    int BUFFSIZE = 512;
-    DATA buff;
+    int PORT = 38109;
     int ssock, csock;
     int nread;
     int fd;
     struct sockaddr_in client;
     int clilen = sizeof(client);
     pid_t pid;
-    DATABASE database;
-    CUSTOMER *customer;
+    DATABASE *database;
+    CUSTOMER customer;
     char *myfifo = "/tmp/hello";
     char *message; 
     int mkFIFO;
@@ -131,8 +131,9 @@ int main()
     ssock = createSocket(PORT);
     printf("Server listening on port %d\n", PORT);
     fd = open(myfifo, O_RDWR | O_TRUNC);
-    write(fd,  database.customers, sizeof(DATABASE));
-    initDatabase(&database);
+    initDatabase(database);
+    write(fd,  database, sizeof(DATABASE));
+    
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
         if (csock < 0)
@@ -147,28 +148,40 @@ int main()
         }
         if (pid <= 0)
         {
+            DATA buff;
             printf("Accepted connection from %s\n", inet_ntoa(client.sin_addr));
-            while ((nread=read(csock, &buff, BUFFSIZE)) > 0)
+            while ((nread=read(csock, &buff, sizeof(DATA))) > 0)
             {
                 printf("\nReceived %d bytes\n", nread);
-                read(fd, database.customers, sizeof(DATABASE));
+                read(fd, database, sizeof(DATABASE));
                 if (buff.method == POST)
                 {
-                    database.customers[buff.customer.id] = buff.customer;
-                    printf("\nInserted!");
-                    printf("\nSending message back to client.. ");
-                    sendMsg(csock, &buff, sizeof(DATA));
-                    write(fd,  database.customers, sizeof(DATABASE));
+                    if(database->customers[buff.customer.id].id != -1)
+                    {
+                        printf("\nThis id has aldready been registered!");
+                        buff.status.code = 500;
+                        buff.customer.id = -1;
+                    } else
+                    {
+                        database->customers[buff.customer.id] = buff.customer;
+                        printf("\nInserted!");
+                        buff.status.code = 200;
+                    }
+                    printf("\nSending response back to client.. ");
+                   
+                    
                 }else
                 {
-                    customer = findCustomerByCpf(buff.customer.cpf, &database);   
-                    if (customer == NULL){
+                    customer = findCustomerByID(buff.customer.id, database);
+                    if (customer.id == -1){
                         printf("\nCustomer not found!");
                         printf("\nSending message back to client.. ");
-                        buff.error.message = "Customer not found!";
-                        buff.error.code = 404;
+                        buff.status.code = 404;
                     }
+                    buff.customer = customer;
                 }
+                sendMsg(csock, &buff, sizeof(DATA));
+                write(fd,  database, sizeof(DATABASE));
                
             
             }
