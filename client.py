@@ -2,9 +2,9 @@ import socket
 import sys
 import random
 import os
-from customerMenu import customer_menu
-from foodMenu import food_menu
-from drinkMenu import drink_menu
+from clientMenus.customerMenu import customer_menu
+from clientMenus.foodMenu import food_menu
+from clientMenus.drinkMenu import drink_menu
 
 
 def main():
