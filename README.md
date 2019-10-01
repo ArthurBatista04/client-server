@@ -47,6 +47,8 @@ python2.7 client.py
 
 #### References
 
+- [SOCKET](https://www.geeksforgeeks.org/socket-programming-cc/)
 - [FIFO](https://www.geeksforgeeks.org/named-pipe-fifo-example-c-program/)
 - [PIPE](https://www.geeksforgeeks.org/c-program-demonstrate-fork-and-pipe/)
 - [Shared memory](https://www.geeksforgeeks.org/ipc-shared-memory/)
+- [Posix semaphore](https://www.geeksforgeeks.org/use-posix-semaphores-c/)
