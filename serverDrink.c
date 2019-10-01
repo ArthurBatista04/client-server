@@ -38,6 +38,7 @@ int main()
     ssock = createSocket(PORT);
     printf("Server listening on port %d\n", PORT);
     initDatabase(&database);
+    sem_init(&mutex, 0, 1);
 
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
@@ -57,6 +58,7 @@ int main()
             printf("Accepted connection from %s\n", inet_ntoa(client.sin_addr));
             while ((nread = read(csock, &buff, sizeof(DATA))) > 0)
             {
+                sem_wait(&mutex);
                 printf("\nReceived %d bytes\n", nread);
 
                 if (buff.method == POST)
@@ -88,6 +90,7 @@ int main()
                 }
                 printf("\nSending message back to client.. ");
                 sendMsg(csock, &buff, sizeof(DATA));
+                sem_post(&mutex);
             }
             printf("Closing connection to client\n");
             printf("----------------------------\n");

@@ -3,6 +3,8 @@
 #include <arpa/inet.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 typedef struct DRINK_t
 {
@@ -30,6 +32,7 @@ typedef struct DATA_t
     STATUS status;
 } DATA;
 
+sem_t mutex;
 void initDatabase(DATABASE *database);
 DRINK searchDrinkById(int id, DATABASE *database);
 DATABASE database;
