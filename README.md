@@ -47,7 +47,9 @@ python2.7 client.py
 
 #### References
 
-- [SOCKET](https://www.geeksforgeeks.org/socket-programming-cc/)
+- [Python ctypes](https://docs.python.org/3/library/ctypes.html)
+- [Python SOCKET](https://realpython.com/python-sockets/)
+- [C SOCKET](https://www.geeksforgeeks.org/socket-programming-cc/)
 - [FIFO](https://www.geeksforgeeks.org/named-pipe-fifo-example-c-program/)
 - [PIPE](https://www.geeksforgeeks.org/c-program-demonstrate-fork-and-pipe/)
 - [Shared memory](https://www.geeksforgeeks.org/ipc-shared-memory/)
