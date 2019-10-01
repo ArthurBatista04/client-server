@@ -4,6 +4,7 @@
     "python.formatting.provider": "autopep8",
     "files.associations": {
         "socket.h": "c",
-        "servercustomer.h": "c"
+        "servercustomer.h": "c",
+        "pthread.h": "c"
     }
 }

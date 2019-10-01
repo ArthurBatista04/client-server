@@ -1,6 +1,8 @@
 #ifndef SERVERCUSTOMER_H
 #define SERVERCUSTOMER_H
 #include <arpa/inet.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 typedef struct DRINK_t
 {
@@ -30,7 +32,6 @@ typedef struct DATA_t
 
 void initDatabase(DATABASE *database);
 DRINK searchDrinkById(int id, DATABASE *database);
-void *create_shared_memory(size_t size);
 DATABASE database;
 DRINK drink;
 #endif

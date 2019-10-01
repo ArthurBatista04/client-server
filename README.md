@@ -49,4 +49,4 @@ python2.7 client.py
 
 - [FIFO](https://www.geeksforgeeks.org/named-pipe-fifo-example-c-program/)
 - [PIPE](https://www.geeksforgeeks.org/c-program-demonstrate-fork-and-pipe/)
-- [Shared memory](https://stackoverflow.com/questions/5656530/how-to-use-shared-memory-with-linux-in-c)
+- [Shared memory](https://www.geeksforgeeks.org/ipc-shared-memory/)

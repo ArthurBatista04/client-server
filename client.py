@@ -4,6 +4,7 @@ import random
 import os
 from customerMenu import customer_menu
 from foodMenu import food_menu
+from drinkMenu import drink_menu
 
 
 def main():
@@ -30,6 +31,7 @@ def main():
                 food_menu(option, s)
             elif option is "3":
                 option = raw_input('Add or fetch drink?(A/f)')
+                drink_menu(option, s)
             else:
                 print("Invalid input. Try again!")
             option = raw_input('Do you wish to continue?(y/N)')
