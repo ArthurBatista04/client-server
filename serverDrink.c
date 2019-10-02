@@ -25,13 +25,13 @@ DRINK searchDrinkById(int id, DATABASE *database)
 
 int main()
 {
-    int PORT = 38110;
+    int PORT = 38310;
     int ssock, csock;
     int nread;
     struct sockaddr_in client;
     int clilen = sizeof(client);
     pid_t pid;
-    key_t key = ftok("shmfile", 65);
+    key_t key = ftok("shmfiles", 68);
     int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
     DATABASE *shmem = (DATABASE *)shmat(shmid, NULL, 0);
     memcpy(shmem, &database, sizeof(DATABASE *));
@@ -39,7 +39,6 @@ int main()
     printf("Server listening on port %d\n", PORT);
     initDatabase(&database);
     sem_init(&mutex, 0, 1);
-
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
         if (csock < 0)
@@ -92,12 +91,11 @@ int main()
                 sendMsg(csock, &buff, sizeof(DATA));
                 sem_post(&mutex);
             }
-            printf("Closing connection to client\n");
+            printf("Closing connection to proxy\n");
             printf("----------------------------\n");
             closeSocket(csock);
         }
     }
-    shmdt(shmem);
     closeSocket(ssock);
     printf("bye");
     return 0;

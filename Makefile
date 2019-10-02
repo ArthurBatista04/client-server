@@ -10,3 +10,5 @@ main:
 	@echo "SUCCESS ON COMPILING FOOD SERVER!"
 	$(CXX) -pthread serverDrink.c socket.c -o serverDrink.out
 	@echo "SUCCESS ON COMPILING DRINK SERVER!"
+	$(CXX) proxy.c socket.c -o proxy.out
+	@echo "SUCCESS ON COMPILING PROXY!"

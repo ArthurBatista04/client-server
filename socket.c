@@ -27,6 +27,31 @@ int createSocket(int port)
     return sock;
 }
 
+int connectServer(int port)
+{
+    int sock, err;
+    struct sockaddr_in server;
+
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        printf("ERROR: Socket creation failed\n");
+        exit(1);
+    }
+    printf("Socket created\n");
+
+    bzero((char *)&server, sizeof(server));
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(port);
+    if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0)
+    {
+        perror("Error: Connection failed!");
+        return -1;
+    }
+    printf("Success on connecting with server!\n");
+    return sock;
+}
+
 void closeSocket(int sock)
 {
     close(sock);

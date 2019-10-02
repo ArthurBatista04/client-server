@@ -11,7 +11,8 @@ class FOOD(Structure):
     _fields_ = [("id", c_int),
                 ("name", c_char*100),
                 ("category", c_char*100),
-                ("price", c_float)
+                ("price", c_float),
+                ("origin", c_char*100)
                 ]
 
 
@@ -21,6 +22,7 @@ class DATA(Structure):
 
 
 def food_menu(option, s):
+
     if option.lower() in ['a', '']:
         id = raw_input("ID (0-99): ")
         try:
@@ -34,12 +36,14 @@ def food_menu(option, s):
         name = raw_input('Name: ')
         category = raw_input("Category: ")
         price = raw_input('Price: ')
+        origin = raw_input('Origin: ')
         try:
             price = float(price)
         except:
             print("ERROR: price must be a number!")
             return
-        FOOD_input = FOOD(id=id, name=name, price=price, category=category)
+        FOOD_input = FOOD(id=id, name=name, price=price,
+                          category=category, origin=origin)
 
         print("Sending data to server...")
         data = DATA(food=FOOD_input, method=1,
@@ -52,7 +56,8 @@ def food_menu(option, s):
         except:
             print("ERROR: id must be a number!")
             return
-        FOOD_input = FOOD(id=id, name='None', price=-1, category='None')
+        FOOD_input = FOOD(id=id, name='None', price=-1,
+                          category='None', origin='None')
         data = DATA(food=FOOD_input, method=2,
                     status=STATUS(code=0, message='None'))
     else:
@@ -66,8 +71,9 @@ def food_menu(option, s):
     print('Status code: %d ' % data_output.status.code)
     print(data_output.status.message)
     if data_output.food.id != -1:
-        print("ID = %d, Name = %s, price = %f and category = %s" % (data_output.food.id,
-                                                                    data_output.food.name,
-                                                                    data_output.food.price,
-                                                                    data_output.food.category
-                                                                    ))
+        print("ID = %d, Name = %s, price = %f, origin = %s and category = %s" % (data_output.food.id,
+                                                                                 data_output.food.name,
+                                                                                 data_output.food.price,
+                                                                                 data_output.food.origin,
+                                                                                 data_output.food.category
+                                                                                 ))

@@ -25,7 +25,7 @@ FOOD searchFoodById(int id, DATABASE *database)
 
 int main()
 {
-    int PORT = 38110;
+    int PORT = 38410;
     int ssock, csock;
     int nread;
     int fd[2];
@@ -92,7 +92,7 @@ int main()
                 sendMsg(csock, &buff, sizeof(DATA));
                 write(fd[1], &database, sizeof(DATABASE));
             }
-            printf("Closing connection to client\n");
+            printf("Closing connection to proxy\n");
             printf("----------------------------\n");
             closeSocket(csock);
         }

@@ -20,6 +20,7 @@ class DATA(Structure):
 
 
 def customer_menu(option, s):
+
     if option.lower() in ['a', '']:
         id = raw_input("ID (0-99):")
         try:

@@ -8,6 +8,7 @@ typedef struct FOOD_t
     float price;
     char category[100];
     char name[100];
+    char origin[100];
 } FOOD;
 
 typedef struct DATABASE_t

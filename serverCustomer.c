@@ -25,7 +25,7 @@ CUSTOMER findCustomerByID(uint32_t id, DATABASE *database)
 
 int main()
 {
-    int PORT = 38110;
+    int PORT = 38210;
     int ssock, csock;
     int nread;
     int fd;
@@ -99,7 +99,7 @@ int main()
                 sendMsg(csock, &buff, sizeof(DATA));
                 write(fd, &database, sizeof(DATABASE));
             }
-            printf("Closing connection to client\n");
+            printf("Closing connection to proxy\n");
             printf("----------------------------\n");
             closeSocket(csock);
         }

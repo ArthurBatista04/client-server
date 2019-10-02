@@ -15,5 +15,6 @@
 #define GET 2
 int createSocket(int port);
 void closeSocket(int sock);
+int connectServer(int port);
 void sendMsg(int sock, void *msg, uint32_t msgsize);
 #endif
