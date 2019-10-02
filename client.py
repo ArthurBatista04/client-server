@@ -35,7 +35,7 @@ def main():
             else:
                 print("Invalid input. Try again!")
             option = raw_input('Do you wish to continue?(y/N)')
-            if option not in ['y']:
+            if option.lower() not in ['y']:
                 break
             else:
                 os.system('clear')
