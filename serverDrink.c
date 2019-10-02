@@ -31,13 +31,13 @@ int main()
     struct sockaddr_in client;
     int clilen = sizeof(client);
     pid_t pid;
-    key_t key = ftok("shmfiles", 68);
+    key_t key = ftok("shmfile", 65);
     int shmid = shmget(key, 1024, 0666 | IPC_CREAT);
-    DATABASE *shmem = (DATABASE *)shmat(shmid, NULL, 0);
-    memcpy(shmem, &database, sizeof(DATABASE *));
+    DATABASE *shmem = (DATABASE *)shmat(shmid, (void *)0, 0);
     ssock = createSocket(PORT);
     printf("Server listening on port %d\n", PORT);
     initDatabase(&database);
+    shmem = &database;
     sem_init(&mutex, 0, 1);
     while (csock = accept(ssock, (struct sockaddr *)&client, &clilen))
     {
